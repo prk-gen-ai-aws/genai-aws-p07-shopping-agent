@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.agentcore.aws.dev/v1/agentcore.json",
+  "name": "p07ShoppingAgent",
+  "version": 1,
+  "managedBy": "CDK",
+  "tags": {
+    "agentcore:created-by": "agentcore-cli",
+    "agentcore:project-name": "ShoppingAgent"
+  },
+  "runtimes": [
+    {
+      "name": "p07ShoppingAgent",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "ph1/agent/",
+      "runtimeVersion": "PYTHON_3_12",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "environmentVariables": {
+        "LAMBDA_TOOLS_NAME": "p07-ph1-shopping-agent-dev-tools",
+        "AWS_REGION": "us-east-1"
+      }
+    }
+  ]
+}
