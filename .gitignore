@@ -8,3 +8,5 @@ agentcore/.cli/
 agentcore/cdk/node_modules/
 agentcore/cdk/cdk.out/
 *.zip
+ph1/data/*.png
+ph1/data/test_honey.jpg
