@@ -164,9 +164,6 @@ You help customers find products, check ratings, and place orders.
 - Show ratings as x.x/5 (N reviews)
 """
 
-# ── Conversation history (per session) ──────────────────────────
-conversation_history = {}
-
 # ── AgentCore App ────────────────────────────────────────────────
 app = BedrockAgentCoreApp()
 
@@ -174,7 +171,6 @@ app = BedrockAgentCoreApp()
 async def agent_entrypoint(payload: dict) -> str:
     """Agent entrypoint for AgentCore Runtime."""
     prompt = payload.get("prompt", "")
-    session_id = payload.get("sessionId", "default")
     image_base64 = payload.get("image_base64")
     media_type = payload.get("media_type", "image/jpeg")
 
@@ -185,45 +181,21 @@ async def agent_entrypoint(payload: dict) -> str:
 
     tools = [search_products, get_product_rating, place_order, search_by_image]
 
-    # Get or init conversation history for this session
-    if session_id not in conversation_history:
-        conversation_history[session_id] = []
-
     # If image provided, prepend image context to prompt
     if image_base64:
         full_prompt = f"[IMAGE_BASE64={image_base64}] [MEDIA_TYPE={media_type}] {prompt}"
     else:
         full_prompt = prompt
 
-    # Build messages with history
-    messages = conversation_history[session_id] + [
-        {"role": "user", "content": [{"text": full_prompt}]}
-    ]
-
     agent = Agent(
         model=model,
         system_prompt=SYSTEM_PROMPT,
         tools=tools,
-        messages=messages,
         callback_handler=None
     )
 
     response = await agent.invoke_async(full_prompt)
-    response_text = str(response)
-
-    # Update conversation history
-    conversation_history[session_id].append(
-        {"role": "user", "content": [{"text": full_prompt}]}
-    )
-    conversation_history[session_id].append(
-        {"role": "assistant", "content": [{"text": response_text}]}
-    )
-
-    # Keep last 10 turns to avoid token limits
-    if len(conversation_history[session_id]) > 20:
-        conversation_history[session_id] = conversation_history[session_id][-20:]
-
-    return response_text
+    return str(response)
 
 
 if __name__ == "__main__":
