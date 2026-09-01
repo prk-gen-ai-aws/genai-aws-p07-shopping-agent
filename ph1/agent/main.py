@@ -4,6 +4,7 @@ AWS-native rebuild of Dhaval Patel's LangChain Shopping Agent
 Tools: search_products, get_product_rating, place_order, search_by_image
 """
 import json
+import base64
 import os
 import asyncio
 from strands import Agent, tool
@@ -181,12 +182,6 @@ async def agent_entrypoint(payload: dict) -> str:
 
     tools = [search_products, get_product_rating, place_order, search_by_image]
 
-    # If image provided, prepend image context to prompt
-    if image_base64:
-        full_prompt = f"[IMAGE_BASE64={image_base64}] [MEDIA_TYPE={media_type}] {prompt}"
-    else:
-        full_prompt = prompt
-
     agent = Agent(
         model=model,
         system_prompt=SYSTEM_PROMPT,
@@ -194,7 +189,28 @@ async def agent_entrypoint(payload: dict) -> str:
         callback_handler=None
     )
 
-    response = await agent.invoke_async(full_prompt)
+    if image_base64:
+        # Pass image as proper multimodal message
+        messages = [{
+            "role": "user",
+            "content": [
+                {
+                    "image": {
+                        "format": media_type.split("/")[-1],
+                        "source": {
+                            "bytes": base64.b64decode(image_base64)
+                        }
+                    }
+                },
+                {
+                    "text": prompt
+                }
+            ]
+        }]
+        response = await agent.invoke_async(messages)
+    else:
+        response = await agent.invoke_async(prompt)
+
     return str(response)
 
 
