@@ -166,7 +166,16 @@ You help customers find products, check ratings, and place orders.
 """
 
 # ── AgentCore App ────────────────────────────────────────────────
+# Agent in GLOBAL scope — conversation history persists across invocations
 app = BedrockAgentCoreApp()
+
+_model = BedrockModel(model_id=MODEL_ID, region_name=AWS_REGION)
+_agent = Agent(
+    model=_model,
+    system_prompt=SYSTEM_PROMPT,
+    tools=[search_products, get_product_rating, place_order, search_by_image],
+    callback_handler=None
+)
 
 @app.entrypoint
 async def agent_entrypoint(payload: dict) -> str:
@@ -174,20 +183,6 @@ async def agent_entrypoint(payload: dict) -> str:
     prompt = payload.get("prompt", "")
     image_base64 = payload.get("image_base64")
     media_type = payload.get("media_type", "image/jpeg")
-
-    model = BedrockModel(
-        model_id=MODEL_ID,
-        region_name=AWS_REGION
-    )
-
-    tools = [search_products, get_product_rating, place_order, search_by_image]
-
-    agent = Agent(
-        model=model,
-        system_prompt=SYSTEM_PROMPT,
-        tools=tools,
-        callback_handler=None
-    )
 
     if image_base64:
         # Pass image as proper multimodal message
@@ -207,9 +202,9 @@ async def agent_entrypoint(payload: dict) -> str:
                 }
             ]
         }]
-        response = await agent.invoke_async(messages)
+        response = await _agent.invoke_async(messages)
     else:
-        response = await agent.invoke_async(prompt)
+        response = await _agent.invoke_async(prompt)
 
     return str(response)
 
