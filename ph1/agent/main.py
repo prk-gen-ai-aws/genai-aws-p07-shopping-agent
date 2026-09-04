@@ -161,7 +161,7 @@ You help customers find products, check ratings, and place orders.
 ## Formatting:
 - Use emojis sparingly for a friendly tone 🛒
 - Keep responses concise and scannable
-- Always show price with $ sign
+- Always show price with $ sign — NEVER use backtick for prices
 - Show ratings as x.x/5 (N reviews)
 """
 
