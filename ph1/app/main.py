@@ -3,6 +3,7 @@ P07 Shopping Agent — Streamlit UI
 AWS-native rebuild of Dhaval Patel's LangChain Shopping Agent
 """
 import streamlit as st
+import re
 import boto3
 import json
 import uuid
@@ -155,7 +156,7 @@ if page == "Shopping Agent":
         with st.chat_message("assistant"):
             with st.spinner("Searching products..."):
                 response = invoke_agent(prompt, st.session_state.session_id)
-            st.markdown(response)
+            st.markdown(re.sub(r"`(\d)", r"\$", response))
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.rerun()
 
@@ -167,7 +168,7 @@ if page == "Shopping Agent":
         with st.chat_message("assistant"):
             with st.spinner("Processing..."):
                 response = invoke_agent(prompt, st.session_state.session_id)
-            st.markdown(response)
+            st.markdown(re.sub(r"`(\d)", r"\$", response))
         st.session_state.messages.append({"role": "assistant", "content": response})
 
     # Session controls
