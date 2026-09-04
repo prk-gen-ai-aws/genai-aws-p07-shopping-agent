@@ -109,9 +109,11 @@ if page == "Shopping Agent":
     )
 
     if uploaded_file:
-        st.sidebar.image(uploaded_file, caption="Uploaded image", use_column_width=True)
+        st.sidebar.image(uploaded_file, caption="Uploaded image", width=200)
         if st.sidebar.button("🔍 Find Similar Products", type="primary"):
-            image_base64 = resize_image(uploaded_file)
+            import io
+            uploaded_file.seek(0)
+            image_base64 = resize_image(io.BytesIO(uploaded_file.read()))
             media_type = "image/jpeg"
             with st.spinner("Analyzing image and searching products..."):
                 response = invoke_agent(
